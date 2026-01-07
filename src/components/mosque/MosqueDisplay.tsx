@@ -28,6 +28,7 @@ export const MosqueDisplay: React.FC<MosqueDisplayProps> = ({
     screenState,
     timeToNextEvent,
     settings,
+    hijriDate,
     advanceDemo,
   } = usePrayerScheduler(isDemoActive);
 
@@ -91,6 +92,7 @@ export const MosqueDisplay: React.FC<MosqueDisplayProps> = ({
             nextPrayer={nextPrayer}
             timeToNextEvent={timeToNextEvent}
             mosqueName={settings.name}
+            hijriDate={hijriDate}
           />
         );
     }

@@ -1,1 +1,4 @@
 project_id = "mmwurvdycakytbdexdhl"
+
+[functions.get-prayer-times]
+verify_jwt = false

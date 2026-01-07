@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   calculatePrayerTimes,
+  getPrayerTimesWithCache,
   getNextPrayer,
   defaultSettings,
   type DailyPrayerTimes,
@@ -18,6 +19,8 @@ interface SchedulerState {
   screenState: ScreenState;
   timeToNextEvent: number; // milliseconds
   settings: MosqueSettings;
+  hijriDate: string;
+  isLoading: boolean;
 }
 
 export function usePrayerScheduler(demoMode: boolean = false) {
@@ -34,6 +37,8 @@ export function usePrayerScheduler(demoMode: boolean = false) {
       screenState: 'dashboard',
       timeToNextEvent: nextPrayer ? nextPrayer.prayer.time.getTime() - now.getTime() : 0,
       settings: defaultSettings,
+      hijriDate: '',
+      isLoading: true,
     };
   });
 
@@ -65,14 +70,52 @@ export function usePrayerScheduler(demoMode: boolean = false) {
     });
   }, []);
 
+  // Fetch prayer times from API on mount and when date changes
+  useEffect(() => {
+    const fetchPrayerTimes = async () => {
+      try {
+        const result = await getPrayerTimesWithCache(state.settings);
+        const now = new Date();
+        const nextPrayer = getNextPrayer(result.prayerTimes, now);
+        
+        setState(prev => ({
+          ...prev,
+          prayerTimes: result.prayerTimes,
+          hijriDate: result.hijriDate,
+          nextPrayer,
+          isLoading: false,
+        }));
+        
+        console.log('Prayer times loaded from API:', result.prayerTimes);
+      } catch (error) {
+        console.error('Failed to fetch prayer times:', error);
+        setState(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+
+    fetchPrayerTimes();
+    
+    // Refresh at midnight
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 5, 0, 0); // 00:05 AM
+    const msUntilMidnight = tomorrow.getTime() - now.getTime();
+    
+    const midnightTimeout = setTimeout(() => {
+      fetchPrayerTimes();
+    }, msUntilMidnight);
+    
+    return () => clearTimeout(midnightTimeout);
+  }, [state.settings]);
+
   // Update time every second
   useEffect(() => {
     const interval = setInterval(() => {
       if (demoMode) return;
       
       const now = new Date();
-      const prayerTimes = calculatePrayerTimes(now, state.settings);
-      const nextPrayer = getNextPrayer(prayerTimes, now);
+      const nextPrayer = getNextPrayer(state.prayerTimes, now);
       
       // Determine screen state based on time
       let screenState: ScreenState = 'dashboard';
@@ -136,7 +179,6 @@ export function usePrayerScheduler(demoMode: boolean = false) {
       setState(prev => ({
         ...prev,
         currentTime: now,
-        prayerTimes,
         nextPrayer,
         currentPrayer,
         screenState,
@@ -145,7 +187,7 @@ export function usePrayerScheduler(demoMode: boolean = false) {
     }, 1000);
     
     return () => clearInterval(interval);
-  }, [state.settings, state.currentPrayer, demoMode]);
+  }, [state.prayerTimes, state.settings, state.currentPrayer, demoMode]);
 
   // Demo mode auto-advance
   useEffect(() => {
