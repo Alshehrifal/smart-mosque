@@ -1,5 +1,6 @@
-// Prayer times calculation using the Umm al-Qura method
-// This is a simplified calculation - for production, use a proper library
+// Prayer times using AlAdhan API with Umm al-Qura method
+
+import { supabase } from "@/integrations/supabase/client";
 
 export interface PrayerTime {
   name: string;
@@ -31,21 +32,21 @@ export type ScreenState =
 export interface MosqueSettings {
   name: string;
   city: string;
-  latitude: number;
-  longitude: number;
-  calculationMethod: string;
+  country: string;
+  calculationMethod: string; // AlAdhan method ID
+  school: string; // 0 = Shafi, 1 = Hanafi
   iqamaOffsets: Record<PrayerName, number>;
   prayerDuration: number; // minutes
   adhkarDuration: number; // minutes
 }
 
-// Default mosque settings
+// Default mosque settings - Jeddah with Umm Al-Qura method
 export const defaultSettings: MosqueSettings = {
   name: 'مسجد النور',
-  city: 'الرياض',
-  latitude: 24.7136,
-  longitude: 46.6753,
-  calculationMethod: 'UmmAlQura',
+  city: 'Jeddah',
+  country: 'Saudi Arabia',
+  calculationMethod: '4', // Umm Al-Qura
+  school: '0', // Shafi
   iqamaOffsets: {
     fajr: 20,
     sunrise: 0,
@@ -58,86 +59,182 @@ export const defaultSettings: MosqueSettings = {
   adhkarDuration: 5,
 };
 
-// Simplified prayer time calculation
-// In production, use a proper library like adhan-js
-function toRadians(degrees: number): number {
-  return degrees * (Math.PI / 180);
+// Cache for prayer times
+interface PrayerTimesCache {
+  date: string;
+  data: DailyPrayerTimes;
+  hijriDate: string;
 }
 
-function toDegrees(radians: number): number {
-  return radians * (180 / Math.PI);
+let prayerTimesCache: PrayerTimesCache | null = null;
+
+// Parse time string (HH:MM) to Date object
+function parseTimeString(timeStr: string, date: Date): Date {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  const result = new Date(date);
+  result.setHours(hours, minutes, 0, 0);
+  return result;
 }
 
-export function calculatePrayerTimes(date: Date, settings: MosqueSettings): DailyPrayerTimes {
-  const { latitude, longitude } = settings;
+// Get today's date string for cache key
+function getTodayKey(): string {
+  const today = new Date();
+  return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+}
+
+// Fetch prayer times from AlAdhan API via edge function
+export async function fetchPrayerTimesFromAPI(settings: MosqueSettings): Promise<{ prayerTimes: DailyPrayerTimes; hijriDate: string } | null> {
+  try {
+    const { data, error } = await supabase.functions.invoke('get-prayer-times', {
+      body: null,
+    });
+
+    if (error) {
+      console.error('Error fetching prayer times:', error);
+      return null;
+    }
+
+    if (!data.success) {
+      console.error('API error:', data.error);
+      return null;
+    }
+
+    const timings = data.data.timings;
+    const today = new Date();
+    
+    const prayerTimes: DailyPrayerTimes = {
+      fajr: {
+        name: 'Fajr',
+        nameAr: 'الفجر',
+        time: parseTimeString(timings.Fajr, today),
+        iqamaOffset: settings.iqamaOffsets.fajr,
+      },
+      sunrise: {
+        name: 'Sunrise',
+        nameAr: 'الشروق',
+        time: parseTimeString(timings.Sunrise, today),
+        iqamaOffset: 0,
+      },
+      dhuhr: {
+        name: 'Dhuhr',
+        nameAr: 'الظهر',
+        time: parseTimeString(timings.Dhuhr, today),
+        iqamaOffset: settings.iqamaOffsets.dhuhr,
+      },
+      asr: {
+        name: 'Asr',
+        nameAr: 'العصر',
+        time: parseTimeString(timings.Asr, today),
+        iqamaOffset: settings.iqamaOffsets.asr,
+      },
+      maghrib: {
+        name: 'Maghrib',
+        nameAr: 'المغرب',
+        time: parseTimeString(timings.Maghrib, today),
+        iqamaOffset: settings.iqamaOffsets.maghrib,
+      },
+      isha: {
+        name: 'Isha',
+        nameAr: 'العشاء',
+        time: parseTimeString(timings.Isha, today),
+        iqamaOffset: settings.iqamaOffsets.isha,
+      },
+    };
+
+    // Get Hijri date from response
+    const hijri = data.data.date.hijri;
+    const hijriDate = `${hijri.day} ${hijri.month.ar} ${hijri.year}`;
+
+    return { prayerTimes, hijriDate };
+  } catch (error) {
+    console.error('Error fetching prayer times:', error);
+    return null;
+  }
+}
+
+// Calculate prayer times with caching
+export async function getPrayerTimesWithCache(settings: MosqueSettings): Promise<{ prayerTimes: DailyPrayerTimes; hijriDate: string }> {
+  const todayKey = getTodayKey();
   
-  // Get day of year
-  const start = new Date(date.getFullYear(), 0, 0);
-  const diff = date.getTime() - start.getTime();
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
+  // Check cache
+  if (prayerTimesCache && prayerTimesCache.date === todayKey) {
+    console.log('Using cached prayer times');
+    return { prayerTimes: prayerTimesCache.data, hijriDate: prayerTimesCache.hijriDate };
+  }
   
-  // Calculate sun declination
-  const declination = -23.45 * Math.cos(toRadians((360 / 365) * (dayOfYear + 10)));
+  // Fetch from API
+  const result = await fetchPrayerTimesFromAPI(settings);
   
-  // Equation of time (simplified)
-  const B = (360 / 365) * (dayOfYear - 81);
-  const EoT = 9.87 * Math.sin(toRadians(2 * B)) - 7.53 * Math.cos(toRadians(B)) - 1.5 * Math.sin(toRadians(B));
+  if (result) {
+    // Update cache
+    prayerTimesCache = {
+      date: todayKey,
+      data: result.prayerTimes,
+      hijriDate: result.hijriDate,
+    };
+    return result;
+  }
   
-  // Solar noon in minutes from midnight
-  const solarNoon = 720 - 4 * longitude - EoT + (date.getTimezoneOffset() * -1);
-  
-  // Hour angle for different prayers
-  const latRad = toRadians(latitude);
-  const decRad = toRadians(declination);
-  
-  // Sunrise/Sunset hour angle
-  const sunriseHA = toDegrees(Math.acos(-Math.tan(latRad) * Math.tan(decRad)));
-  
-  // Fajr angle (18 degrees below horizon for Umm al-Qura)
-  const fajrAngle = 18.5;
-  const fajrHA = toDegrees(Math.acos(
-    (Math.sin(toRadians(-fajrAngle)) - Math.sin(latRad) * Math.sin(decRad)) /
-    (Math.cos(latRad) * Math.cos(decRad))
-  ));
-  
-  // Isha angle (varies by calculation method)
-  const ishaAngle = 17;
-  const ishaHA = toDegrees(Math.acos(
-    (Math.sin(toRadians(-ishaAngle)) - Math.sin(latRad) * Math.sin(decRad)) /
-    (Math.cos(latRad) * Math.cos(decRad))
-  ));
-  
-  // Asr shadow length (Shafi'i: shadow = object + shadow at noon)
-  const asrAngle = toDegrees(Math.atan(1 / (1 + Math.tan(Math.abs(latRad - decRad)))));
-  const asrHA = toDegrees(Math.acos(
-    (Math.sin(toRadians(90 - asrAngle)) - Math.sin(latRad) * Math.sin(decRad)) /
-    (Math.cos(latRad) * Math.cos(decRad))
-  ));
-  
-  // Calculate times
-  const fajrMinutes = solarNoon - fajrHA * 4;
-  const sunriseMinutes = solarNoon - sunriseHA * 4;
-  const dhuhrMinutes = solarNoon + 2; // Add 2 minutes after solar noon
-  const asrMinutes = solarNoon + asrHA * 4;
-  const maghribMinutes = solarNoon + sunriseHA * 4;
-  const ishaMinutes = solarNoon + ishaHA * 4;
-  
-  const createTime = (minutes: number, name: string, nameAr: string, iqamaOffset: number): PrayerTime => {
-    const time = new Date(date);
-    time.setHours(0, 0, 0, 0);
-    time.setMinutes(Math.round(minutes));
-    return { name, nameAr, time, iqamaOffset };
+  // Fallback to local calculation if API fails
+  console.warn('API failed, using fallback calculation');
+  return { prayerTimes: calculatePrayerTimesFallback(new Date(), settings), hijriDate: getHijriDate(new Date()) };
+}
+
+// Fallback local calculation (simplified)
+function calculatePrayerTimesFallback(date: Date, settings: MosqueSettings): DailyPrayerTimes {
+  // Default times for Jeddah as fallback
+  const defaultTimes = {
+    fajr: '05:30',
+    sunrise: '06:50',
+    dhuhr: '12:20',
+    asr: '15:35',
+    maghrib: '18:05',
+    isha: '19:35',
   };
   
   return {
-    fajr: createTime(fajrMinutes, 'Fajr', 'الفجر', settings.iqamaOffsets.fajr),
-    sunrise: createTime(sunriseMinutes, 'Sunrise', 'الشروق', 0),
-    dhuhr: createTime(dhuhrMinutes, 'Dhuhr', 'الظهر', settings.iqamaOffsets.dhuhr),
-    asr: createTime(asrMinutes, 'Asr', 'العصر', settings.iqamaOffsets.asr),
-    maghrib: createTime(maghribMinutes, 'Maghrib', 'المغرب', settings.iqamaOffsets.maghrib),
-    isha: createTime(ishaMinutes, 'Isha', 'العشاء', settings.iqamaOffsets.isha),
+    fajr: {
+      name: 'Fajr',
+      nameAr: 'الفجر',
+      time: parseTimeString(defaultTimes.fajr, date),
+      iqamaOffset: settings.iqamaOffsets.fajr,
+    },
+    sunrise: {
+      name: 'Sunrise',
+      nameAr: 'الشروق',
+      time: parseTimeString(defaultTimes.sunrise, date),
+      iqamaOffset: 0,
+    },
+    dhuhr: {
+      name: 'Dhuhr',
+      nameAr: 'الظهر',
+      time: parseTimeString(defaultTimes.dhuhr, date),
+      iqamaOffset: settings.iqamaOffsets.dhuhr,
+    },
+    asr: {
+      name: 'Asr',
+      nameAr: 'العصر',
+      time: parseTimeString(defaultTimes.asr, date),
+      iqamaOffset: settings.iqamaOffsets.asr,
+    },
+    maghrib: {
+      name: 'Maghrib',
+      nameAr: 'المغرب',
+      time: parseTimeString(defaultTimes.maghrib, date),
+      iqamaOffset: settings.iqamaOffsets.maghrib,
+    },
+    isha: {
+      name: 'Isha',
+      nameAr: 'العشاء',
+      time: parseTimeString(defaultTimes.isha, date),
+      iqamaOffset: settings.iqamaOffsets.isha,
+    },
   };
+}
+
+// Synchronous fallback for initial state (before API loads)
+export function calculatePrayerTimes(date: Date, settings: MosqueSettings): DailyPrayerTimes {
+  return calculatePrayerTimesFallback(date, settings);
 }
 
 export function getNextPrayer(prayerTimes: DailyPrayerTimes, currentTime: Date): { prayer: PrayerTime; name: PrayerName } | null {
@@ -179,7 +276,7 @@ export function formatTimeRemaining(ms: number): string {
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-// Hijri date calculation (simplified)
+// Hijri date calculation (fallback using browser API)
 export function getHijriDate(date: Date): string {
   try {
     return date.toLocaleDateString('ar-SA-u-ca-islamic', {

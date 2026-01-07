@@ -16,6 +16,7 @@ interface DashboardScreenProps {
   nextPrayer: { prayer: PrayerTime; name: PrayerName } | null;
   timeToNextEvent: number;
   mosqueName: string;
+  hijriDate?: string;
 }
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({
@@ -24,6 +25,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   nextPrayer,
   timeToNextEvent,
   mosqueName,
+  hijriDate,
 }) => {
   const prayers: { prayer: PrayerTime; name: PrayerName }[] = [
     { prayer: prayerTimes.fajr, name: 'fajr' },
@@ -54,7 +56,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               {getGregorianDate(currentTime)}
             </p>
             <p className="font-arabic text-muted-foreground">
-              {getHijriDate(currentTime)}
+              {hijriDate || getHijriDate(currentTime)}
             </p>
           </div>
         </div>
