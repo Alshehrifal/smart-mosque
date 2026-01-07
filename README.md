@@ -1,71 +1,113 @@
-# Mosque Clock
+---
 
-**URL**: https://smart-mosque.lovable.app/
+# 🕌 Mosque Clock
 
-## How can I edit this code?
+A modern, lightweight web application that displays accurate prayer times and mosque-friendly clock features with a clean and responsive UI.
 
-There are several ways of editing your application.
+🔗 **Live Demo**:
+[https://smart-mosque.lovable.app/](https://smart-mosque.lovable.app/)
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## ✨ Features
 
-Changes made via Lovable will be committed automatically to this repo.
+* 🕰️ Real-time clock optimized for mosque displays
+* 🕌 Prayer time visualization
+* 🌙 Clean, minimal, and distraction-free UI
+* 📱 Fully responsive (TV, tablet, desktop)
+* ⚡ Fast performance using Vite + React
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🛠️ Tech Stack
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+This project is built with modern frontend tools:
 
-Follow these steps:
+* **Vite** – fast build tool & dev server
+* **React** – UI framework
+* **TypeScript** – type safety & scalability
+* **Tailwind CSS** – utility-first styling
+* **shadcn/ui** – accessible UI components
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+---
+
+## 🚀 Getting Started
+
+You can edit and run this project in multiple ways depending on your workflow.
+
+---
+
+### Option 1: Edit via **Lovable** (Recommended)
+
+1. Open the project on Lovable:
+   👉 [https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID)
+2. Prompt changes directly in the editor.
+3. All updates are automatically committed to this repository.
+
+---
+
+### Option 2: Run Locally (Your Own IDE)
+
+#### Prerequisites
+
+* Node.js (recommended via `nvm`)
+* npm
+
+#### Steps
+
+```bash
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Navigate into the project
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available with hot-reload for instant previews.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+### Option 3: Edit Directly on GitHub
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Open any file in the repository.
+2. Click the ✏️ **Edit** button.
+3. Commit your changes — they will sync with Lovable automatically.
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+### Option 4: GitHub Codespaces
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Go to the repository main page.
+2. Click **Code → Codespaces → New codespace**.
+3. Edit, commit, and push directly from the browser.
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## 🌍 Deployment
 
-## Can I connect a custom domain to my Lovable project?
+Deployment is handled seamlessly via **Lovable**:
 
-Yes, you can!
+1. Open the project on Lovable
+2. Click **Share → Publish**
+3. Your app is instantly live 🚀
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🌐 Custom Domain Support
+
+Yes, you can connect your own domain!
+
+1. Go to **Project → Settings → Domains**
+2. Click **Connect Domain**
+3. Follow the setup instructions
+
+📖 Documentation:
+[https://docs.lovable.dev/features/custom-domain#custom-domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+
