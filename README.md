@@ -1,5 +1,3 @@
----
-
 # 🕌 Mosque Clock
 
 A modern, lightweight web application that displays accurate prayer times and mosque-friendly clock features with a clean and responsive UI.
