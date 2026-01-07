@@ -6,7 +6,62 @@
 
 @layer base {
   :root {
-    /* Islamic-inspired color palette */
+    /* Light theme - Islamic-inspired color palette */
+    --background: 45 30% 97%;
+    --foreground: 160 30% 15%;
+
+    --card: 45 25% 95%;
+    --card-foreground: 160 30% 15%;
+
+    --popover: 45 25% 97%;
+    --popover-foreground: 160 30% 15%;
+
+    /* Emerald green - primary */
+    --primary: 160 60% 35%;
+    --primary-foreground: 45 30% 98%;
+
+    /* Gold accent */
+    --secondary: 45 70% 45%;
+    --secondary-foreground: 160 30% 15%;
+
+    --muted: 160 15% 90%;
+    --muted-foreground: 160 20% 45%;
+
+    --accent: 45 70% 45%;
+    --accent-foreground: 160 30% 15%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 160 15% 85%;
+    --input: 160 15% 88%;
+    --ring: 160 60% 35%;
+
+    --radius: 1rem;
+
+    /* Custom tokens */
+    --gradient-islamic: linear-gradient(135deg, hsl(45 30% 97%) 0%, hsl(45 25% 93%) 50%, hsl(45 30% 95%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(45 70% 45%) 0%, hsl(45 80% 55%) 50%, hsl(45 70% 45%) 100%);
+    --gradient-emerald: linear-gradient(135deg, hsl(160 50% 30%) 0%, hsl(160 60% 40%) 50%, hsl(160 50% 30%) 100%);
+    
+    --shadow-glow: 0 0 60px hsl(160 60% 35% / 0.2);
+    --shadow-gold: 0 0 40px hsl(45 70% 45% / 0.2);
+    
+    --font-arabic: 'Amiri', 'Noto Sans Arabic', serif;
+    --font-display: 'Noto Sans Arabic', sans-serif;
+
+    --sidebar-background: 45 25% 95%;
+    --sidebar-foreground: 160 30% 15%;
+    --sidebar-primary: 160 60% 35%;
+    --sidebar-primary-foreground: 45 30% 98%;
+    --sidebar-accent: 45 70% 45%;
+    --sidebar-accent-foreground: 160 30% 15%;
+    --sidebar-border: 160 15% 85%;
+    --sidebar-ring: 160 60% 35%;
+  }
+
+  .dark {
+    /* Dark theme - Islamic-inspired color palette */
     --background: 160 30% 8%;
     --foreground: 45 30% 95%;
 
@@ -16,11 +71,9 @@
     --popover: 160 25% 10%;
     --popover-foreground: 45 30% 95%;
 
-    /* Emerald green - primary */
     --primary: 160 60% 40%;
     --primary-foreground: 45 30% 98%;
 
-    /* Gold accent */
     --secondary: 45 70% 50%;
     --secondary-foreground: 160 30% 8%;
 
@@ -37,18 +90,9 @@
     --input: 160 20% 25%;
     --ring: 160 60% 40%;
 
-    --radius: 1rem;
-
-    /* Custom tokens */
     --gradient-islamic: linear-gradient(135deg, hsl(160 30% 8%) 0%, hsl(160 35% 12%) 50%, hsl(160 25% 10%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(45 70% 45%) 0%, hsl(45 80% 55%) 50%, hsl(45 70% 45%) 100%);
-    --gradient-emerald: linear-gradient(135deg, hsl(160 50% 30%) 0%, hsl(160 60% 40%) 50%, hsl(160 50% 30%) 100%);
-    
     --shadow-glow: 0 0 60px hsl(160 60% 40% / 0.3);
     --shadow-gold: 0 0 40px hsl(45 70% 50% / 0.3);
-    
-    --font-arabic: 'Amiri', 'Noto Sans Arabic', serif;
-    --font-display: 'Noto Sans Arabic', sans-serif;
 
     --sidebar-background: 160 25% 10%;
     --sidebar-foreground: 45 30% 95%;
@@ -58,28 +102,6 @@
     --sidebar-accent-foreground: 160 30% 8%;
     --sidebar-border: 160 20% 20%;
     --sidebar-ring: 160 60% 40%;
-  }
-
-  .dark {
-    --background: 160 30% 8%;
-    --foreground: 45 30% 95%;
-    --card: 160 25% 12%;
-    --card-foreground: 45 30% 95%;
-    --popover: 160 25% 10%;
-    --popover-foreground: 45 30% 95%;
-    --primary: 160 60% 40%;
-    --primary-foreground: 45 30% 98%;
-    --secondary: 45 70% 50%;
-    --secondary-foreground: 160 30% 8%;
-    --muted: 160 20% 20%;
-    --muted-foreground: 160 15% 60%;
-    --accent: 45 70% 50%;
-    --accent-foreground: 160 30% 8%;
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 160 20% 20%;
-    --input: 160 20% 25%;
-    --ring: 160 60% 40%;
   }
 }
 

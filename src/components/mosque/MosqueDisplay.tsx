@@ -9,6 +9,7 @@ import { PrayerScreen } from './screens/PrayerScreen';
 import { AdhkarScreen } from './screens/AdhkarScreen';
 import { Button } from '@/components/ui/button';
 import { Play, SkipForward, Eye, EyeOff } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface MosqueDisplayProps {
   demoMode?: boolean;
@@ -99,7 +100,12 @@ export const MosqueDisplay: React.FC<MosqueDisplayProps> = ({
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden bg-background">
+      {/* Theme toggle - top right */}
+      <div className="fixed top-4 left-4 z-50 p-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border/50">
+        <ThemeToggle />
+      </div>
+
       {/* Main display */}
       <div className="w-full h-full">
         {renderScreen()}
