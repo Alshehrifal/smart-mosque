@@ -1,8 +1,6 @@
-# Welcome to your Lovable project
+# Mosque Clock
 
-## Project info
-
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**URL**: https://smart-mosque.lovable.app/
 
 ## How can I edit this code?
 
