@@ -65,7 +65,7 @@ export const BetweenAdhanIqamaScreen: React.FC<BetweenAdhanIqamaScreenProps> = (
             </div>
             
             {/* Dhikr text */}
-            <p className="font-arabic text-3xl md:text-4xl lg:text-5xl leading-loose text-foreground whitespace-pre-line">
+            <p className="font-arabic text-3xl md:text-4xl lg:text-5xl leading-relaxed text-foreground whitespace-pre-wrap break-words">
               {currentDhikr.text}
             </p>
             

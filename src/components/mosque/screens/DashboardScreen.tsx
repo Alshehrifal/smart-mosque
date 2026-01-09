@@ -5,6 +5,7 @@ import { IslamicPattern } from '../IslamicPattern';
 import { 
   getGregorianDate, 
   getHijriDate,
+  formatTime,
   type DailyPrayerTimes,
   type PrayerTime,
   type PrayerName,
@@ -40,42 +41,38 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     <div className="min-h-screen bg-islamic flex flex-col relative overflow-hidden">
       <IslamicPattern opacity={0.04} />
       
-      {/* Header */}
+      {/* Header - Mosque Name only */}
       <header className="relative z-10 px-8 py-6 border-b border-border/30">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Mosque Name */}
-          <div className="text-center md:text-right">
-            <h1 className="font-arabic text-3xl md:text-4xl text-gradient-gold">
-              {mosqueName}
-            </h1>
-          </div>
-          
-          {/* Date Display */}
-          <div className="text-center md:text-left space-y-1">
-            <p className="font-display text-lg text-foreground">
-              {getGregorianDate(currentTime)}
-            </p>
-            <p className="font-arabic text-muted-foreground">
-              {hijriDate || getHijriDate(currentTime)}
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="font-arabic text-3xl md:text-4xl text-gradient-gold">
+            {mosqueName}
+          </h1>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-8 py-12">
-        {/* Next Prayer Countdown */}
+        {/* Next Prayer Section */}
         {nextPrayer && nextPrayer.name !== 'sunrise' && (
           <div className="mb-12 text-center animate-fade-in-up">
             <h2 className="font-arabic text-2xl md:text-3xl text-foreground/80 mb-4">
               الصلاة القادمة: {nextPrayer.prayer.nameAr}
             </h2>
+            {/* Countdown Timer */}
             <CountdownTimer
               milliseconds={timeToNextEvent}
               label="الوقت المتبقي"
               size="large"
               variant="primary"
             />
+            {/* Prayer Time */}
+            <p className="mt-4 font-display text-2xl md:text-3xl text-foreground/90 tabular-nums">
+              {formatTime(nextPrayer.prayer.time)}
+            </p>
+            {/* Hijri Date */}
+            <p className="mt-2 font-arabic text-xl text-muted-foreground">
+              {hijriDate || getHijriDate(currentTime)}
+            </p>
           </div>
         )}
 
@@ -96,7 +93,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
       {/* Footer */}
       <footer className="relative z-10 px-8 py-4 border-t border-border/30">
-        <div className="max-w-7xl mx-auto flex items-center justify-center">
+        <div className="max-w-7xl mx-auto flex flex-col items-center gap-2">
           <p className="font-display text-5xl md:text-6xl font-bold text-foreground tabular-nums">
             {currentTime.toLocaleTimeString('ar-SA', {
               hour: '2-digit',
@@ -104,6 +101,10 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               second: '2-digit',
               hour12: false,
             })}
+          </p>
+          {/* Gregorian Date */}
+          <p className="font-display text-lg text-muted-foreground">
+            {getGregorianDate(currentTime)}
           </p>
         </div>
       </footer>
