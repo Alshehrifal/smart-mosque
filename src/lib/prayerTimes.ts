@@ -270,10 +270,17 @@ export function formatTimeRemaining(ms: number): string {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   
+  // Convert to Arabic numerals
+  const toArabicNumerals = (num: number, pad: boolean = true): string => {
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    const str = pad ? num.toString().padStart(2, '0') : num.toString();
+    return str.replace(/\d/g, (d) => arabicDigits[parseInt(d)]);
+  };
+  
   if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return `${toArabicNumerals(hours, false)}:${toArabicNumerals(minutes)}:${toArabicNumerals(seconds)}`;
   }
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  return `${toArabicNumerals(minutes)}:${toArabicNumerals(seconds)}`;
 }
 
 // Hijri date calculation (fallback using browser API)
