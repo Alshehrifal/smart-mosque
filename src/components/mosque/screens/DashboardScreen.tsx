@@ -38,24 +38,24 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   ];
 
   return (
-    <div className="min-h-screen bg-islamic flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-islamic flex flex-col relative overflow-x-hidden overflow-y-auto">
       <IslamicPattern opacity={0.04} />
       
       {/* Header - Mosque Name only */}
-      <header className="relative z-10 px-8 py-6 border-b border-border/30">
+      <header className="relative z-10 px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 border-b border-border/30">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="font-arabic text-3xl md:text-4xl text-gradient-gold">
+          <h1 className="font-arabic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gradient-gold">
             {mosqueName}
           </h1>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-8 py-12">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-12">
         {/* Next Prayer Section */}
         {nextPrayer && nextPrayer.name !== 'sunrise' && (
-          <div className="mb-12 text-center animate-fade-in-up">
-            <h2 className="font-arabic text-2xl md:text-3xl text-foreground/80 mb-4">
+          <div className="mb-6 sm:mb-8 md:mb-12 text-center animate-fade-in-up w-full max-w-lg">
+            <h2 className="font-arabic text-lg sm:text-xl md:text-2xl lg:text-3xl text-foreground/80 mb-2 sm:mb-3 md:mb-4">
               الصلاة القادمة: {nextPrayer.prayer.nameAr}
             </h2>
             {/* Countdown Timer */}
@@ -66,19 +66,19 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               variant="primary"
             />
             {/* Prayer Time */}
-            <p className="mt-4 font-display text-2xl md:text-3xl text-foreground/90 tabular-nums">
+            <p className="mt-2 sm:mt-3 md:mt-4 font-display text-lg sm:text-xl md:text-2xl lg:text-3xl text-foreground/90 tabular-nums">
               {formatTime(nextPrayer.prayer.time)}
             </p>
             {/* Hijri Date */}
-            <p className="mt-2 font-arabic text-xl text-muted-foreground">
+            <p className="mt-1 sm:mt-2 font-arabic text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground">
               {hijriDate || getHijriDate(currentTime)}
             </p>
           </div>
         )}
 
         {/* Prayer Times Grid */}
-        <div className="w-full max-w-6xl">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+        <div className="w-full max-w-6xl px-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
             {prayers.map(({ prayer, name }) => (
               <PrayerTimeCard
                 key={name}
@@ -92,9 +92,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 px-8 py-4 border-t border-border/30">
-        <div className="max-w-7xl mx-auto flex flex-col items-center gap-2">
-          <p className="font-display text-5xl md:text-6xl font-bold text-foreground tabular-nums">
+      <footer className="relative z-10 px-4 sm:px-6 md:px-8 py-3 sm:py-4 border-t border-border/30">
+        <div className="max-w-7xl mx-auto flex flex-col items-center gap-1 sm:gap-2">
+          <p className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground tabular-nums">
             {currentTime.toLocaleTimeString('ar-SA', {
               hour: '2-digit',
               minute: '2-digit',
@@ -103,7 +103,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             })}
           </p>
           {/* Gregorian Date */}
-          <p className="font-display text-lg text-muted-foreground">
+          <p className="font-display text-xs sm:text-sm md:text-base lg:text-lg text-muted-foreground">
             {getGregorianDate(currentTime)}
           </p>
         </div>
