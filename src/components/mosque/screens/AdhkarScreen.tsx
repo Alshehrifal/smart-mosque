@@ -29,41 +29,41 @@ export const AdhkarScreen: React.FC<AdhkarScreenProps> = ({
   }, []);
 
   return (
-    <div className="min-h-screen bg-islamic flex flex-col relative overflow-x-hidden overflow-y-auto">
+    <div className="h-screen bg-islamic flex flex-col relative overflow-hidden">
       <IslamicPattern opacity={0.04} />
       
       {/* Header */}
-      <header className="relative z-10 px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 border-b border-border/30">
+      <header className="relative z-10 px-12 py-8 border-b border-border/30">
         <div className="text-center">
-          <h1 className="font-arabic text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gradient-gold">
+          <h1 className="font-arabic text-5xl text-gradient-gold">
             أذكار بعد صلاة {prayer.nameAr}
           </h1>
         </div>
       </header>
 
       {/* Main content - Dhikr display */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-12">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-16 py-8">
         {currentDhikr && (
           <div 
             key={currentDhikr.id}
-            className="w-full max-w-4xl text-center animate-fade-in-up"
+            className="w-full max-w-[1600px] text-center animate-fade-in-up"
           >
             {/* Decorative frame */}
-            <div className="relative p-4 sm:p-6 md:p-8 lg:p-12 border border-primary/20 rounded-2xl sm:rounded-3xl bg-card/30 backdrop-blur-sm">
+            <div className="relative p-16 border border-primary/20 rounded-3xl bg-card/30 backdrop-blur-sm">
               {/* Corner decorations */}
-              <div className="absolute top-0 right-0 w-4 sm:w-6 md:w-8 h-4 sm:h-6 md:h-8 border-t-2 border-r-2 border-secondary/50 rounded-tr-2xl sm:rounded-tr-3xl" />
-              <div className="absolute top-0 left-0 w-4 sm:w-6 md:w-8 h-4 sm:h-6 md:h-8 border-t-2 border-l-2 border-secondary/50 rounded-tl-2xl sm:rounded-tl-3xl" />
-              <div className="absolute bottom-0 right-0 w-4 sm:w-6 md:w-8 h-4 sm:h-6 md:h-8 border-b-2 border-r-2 border-secondary/50 rounded-br-2xl sm:rounded-br-3xl" />
-              <div className="absolute bottom-0 left-0 w-4 sm:w-6 md:w-8 h-4 sm:h-6 md:h-8 border-b-2 border-l-2 border-secondary/50 rounded-bl-2xl sm:rounded-bl-3xl" />
+              <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 border-secondary/50 rounded-tr-3xl" />
+              <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-secondary/50 rounded-tl-3xl" />
+              <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-secondary/50 rounded-br-3xl" />
+              <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 border-secondary/50 rounded-bl-3xl" />
               
               {/* Dhikr text */}
-              <p className="font-arabic text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl leading-loose text-foreground whitespace-pre-wrap break-words">
+              <p className="font-arabic text-4xl leading-loose text-foreground whitespace-pre-wrap break-words">
                 {currentDhikr.text}
               </p>
               
               {/* Source */}
               {currentDhikr.source && (
-                <p className="mt-3 sm:mt-4 md:mt-6 font-display text-xs sm:text-sm md:text-base text-muted-foreground">
+                <p className="mt-8 font-display text-2xl text-muted-foreground">
                   {currentDhikr.source}
                 </p>
               )}
@@ -72,13 +72,13 @@ export const AdhkarScreen: React.FC<AdhkarScreenProps> = ({
         )}
         
         {/* Progress indicator */}
-        <div className="mt-4 sm:mt-6 md:mt-8 flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center">
+        <div className="mt-12 flex items-center gap-3">
           {afterPrayerAdhkar.map((_, index) => (
             <div
               key={index}
-              className={`w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
                 index === dhikrIndex 
-                  ? 'bg-primary w-3 sm:w-4' 
+                  ? 'bg-primary w-8' 
                   : 'bg-muted-foreground/30'
               }`}
             />
@@ -87,9 +87,9 @@ export const AdhkarScreen: React.FC<AdhkarScreenProps> = ({
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 px-4 sm:px-6 md:px-8 py-3 sm:py-4 border-t border-border/30">
+      <footer className="relative z-10 px-12 py-6 border-t border-border/30">
         <div className="flex items-center justify-center">
-          <p className="font-display text-xl sm:text-2xl md:text-3xl text-foreground/60 tabular-nums">
+          <p className="font-display text-4xl text-foreground/60 tabular-nums">
             {currentTime.toLocaleTimeString('ar-SA', {
               hour: '2-digit',
               minute: '2-digit',

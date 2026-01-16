@@ -100,45 +100,43 @@ export const MosqueDisplay: React.FC<MosqueDisplayProps> = ({
   };
 
   return (
-    <div className="relative w-full min-h-screen overflow-x-hidden bg-background">
-      {/* Theme toggle - top left with safe area */}
-      <div className="fixed top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 z-50 p-1.5 sm:p-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border/50">
+    <div className="relative w-full h-screen overflow-hidden bg-background">
+      {/* Theme toggle - top left */}
+      <div className="fixed top-6 left-6 z-50 p-3 bg-card/90 backdrop-blur-sm rounded-xl border border-border/50">
         <ThemeToggle />
       </div>
 
-      {/* Main display */}
-      <div className="w-full min-h-screen">
+      {/* Main display - Full screen TV optimized */}
+      <div className="w-full h-screen">
         {renderScreen()}
       </div>
       
-      {/* Demo controls */}
+      {/* Demo controls - TV optimized */}
       {showControls && (
-        <div className="fixed bottom-16 sm:bottom-4 left-2 sm:left-3 md:left-4 z-50 flex flex-col sm:flex-row items-start sm:items-center gap-2 p-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border/50 max-w-[calc(100vw-4rem)] sm:max-w-none">
-          <div className="flex items-center gap-2">
-            <Button
-              variant={isDemoActive ? "default" : "outline"}
-              size="sm"
-              onClick={() => setIsDemoActive(!isDemoActive)}
-              className="gap-1 sm:gap-2 text-xs sm:text-sm min-h-[40px] px-2 sm:px-3"
-            >
-              <Play className="w-3 sm:w-4 h-3 sm:h-4" />
-              {isDemoActive ? 'إيقاف' : 'تجريبي'}
-            </Button>
-            
-            {isDemoActive && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={advanceDemo}
-                className="gap-1 sm:gap-2 text-xs sm:text-sm min-h-[40px] px-2 sm:px-3"
-              >
-                <SkipForward className="w-3 sm:w-4 h-3 sm:h-4" />
-                التالي
-              </Button>
-            )}
-          </div>
+        <div className="fixed bottom-8 left-8 z-50 flex items-center gap-4 p-4 bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50">
+          <Button
+            variant={isDemoActive ? "default" : "outline"}
+            size="lg"
+            onClick={() => setIsDemoActive(!isDemoActive)}
+            className="gap-3 text-xl px-6 py-6"
+          >
+            <Play className="w-6 h-6" />
+            {isDemoActive ? 'إيقاف' : 'تجريبي'}
+          </Button>
           
-          <span className="px-1 sm:px-2 text-xs sm:text-sm text-muted-foreground font-display">
+          {isDemoActive && (
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={advanceDemo}
+              className="gap-3 text-xl px-6 py-6"
+            >
+              <SkipForward className="w-6 h-6" />
+              التالي
+            </Button>
+          )}
+          
+          <span className="px-4 text-xl text-muted-foreground font-display">
             {screenState === 'dashboard' && 'الرئيسية'}
             {screenState === 'pre-adhan' && 'قبل الأذان'}
             {screenState === 'adhan' && 'الأذان'}
@@ -153,9 +151,9 @@ export const MosqueDisplay: React.FC<MosqueDisplayProps> = ({
       {/* Toggle controls button */}
       <button
         onClick={() => setShowControls(!showControls)}
-        className="fixed bottom-4 right-2 sm:right-3 md:right-4 z-50 p-2 sm:p-2.5 bg-card/50 backdrop-blur-sm rounded-full border border-border/30 text-muted-foreground hover:text-foreground transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+        className="fixed bottom-8 right-8 z-50 p-4 bg-card/50 backdrop-blur-sm rounded-full border border-border/30 text-muted-foreground hover:text-foreground transition-colors"
       >
-        {showControls ? <EyeOff className="w-4 sm:w-5 h-4 sm:h-5" /> : <Eye className="w-4 sm:w-5 h-4 sm:h-5" />}
+        {showControls ? <EyeOff className="w-8 h-8" /> : <Eye className="w-8 h-8" />}
       </button>
     </div>
   );

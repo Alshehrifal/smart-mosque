@@ -15,18 +15,18 @@ export const PreAdhanScreen: React.FC<PreAdhanScreenProps> = ({
   currentTime,
 }) => {
   return (
-    <div className="min-h-screen bg-islamic flex flex-col items-center justify-center relative overflow-x-hidden overflow-y-auto">
+    <div className="h-screen bg-islamic flex flex-col items-center justify-center relative overflow-hidden">
       <IslamicPattern opacity={0.05} />
       
       {/* Subtle glow */}
       <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent" />
       
       {/* Content */}
-      <div className="relative z-10 text-center px-4 sm:px-6 md:px-8 animate-fade-in-up w-full max-w-3xl py-8">
+      <div className="relative z-10 text-center px-16 animate-fade-in-up">
         {/* Bell icon */}
-        <div className="mb-4 sm:mb-6 md:mb-8">
+        <div className="mb-12">
           <svg 
-            className="w-12 sm:w-16 md:w-20 h-12 sm:h-16 md:h-20 mx-auto text-secondary animate-float" 
+            className="w-28 h-28 mx-auto text-secondary animate-float" 
             viewBox="0 0 24 24" 
             fill="none"
             stroke="currentColor"
@@ -38,16 +38,16 @@ export const PreAdhanScreen: React.FC<PreAdhanScreenProps> = ({
         </div>
         
         {/* Main text */}
-        <h1 className="font-arabic text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-foreground mb-3 sm:mb-4 md:mb-6">
+        <h1 className="font-arabic text-6xl text-foreground mb-8">
           اقترب موعد
         </h1>
         
-        <h2 className="font-arabic text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-gradient-gold mb-4 sm:mb-6 md:mb-8">
+        <h2 className="font-arabic text-8xl text-gradient-gold mb-12">
           أذان {prayer.nameAr}
         </h2>
         
         {/* Countdown */}
-        <div className="mt-4 sm:mt-6 md:mt-8">
+        <div className="mt-12">
           <CountdownTimer
             milliseconds={timeToAdhan}
             label="الوقت المتبقي"
@@ -57,14 +57,14 @@ export const PreAdhanScreen: React.FC<PreAdhanScreenProps> = ({
         </div>
         
         {/* Reminder */}
-        <p className="mt-6 sm:mt-8 md:mt-12 font-arabic text-base sm:text-lg md:text-xl text-muted-foreground">
+        <p className="mt-16 font-arabic text-3xl text-muted-foreground">
           استعدوا للصلاة
         </p>
       </div>
       
       {/* Current time */}
-      <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2">
-        <p className="font-display text-xl sm:text-2xl md:text-3xl text-foreground/60 tabular-nums">
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
+        <p className="font-display text-4xl text-foreground/60 tabular-nums">
           {currentTime.toLocaleTimeString('ar-SA', {
             hour: '2-digit',
             minute: '2-digit',
