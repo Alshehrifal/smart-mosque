@@ -30,7 +30,7 @@ export const PrayerTimeCard: React.FC<PrayerTimeCardProps> = ({
       
       <h3 
         className={cn(
-          'font-arabic text-4xl mb-4 transition-colors',
+          'font-arabic text-2xl mb-2 transition-colors',
           isNext && 'text-primary',
           isCurrent && 'text-secondary',
           !isNext && !isCurrent && 'text-foreground/80'
@@ -41,7 +41,7 @@ export const PrayerTimeCard: React.FC<PrayerTimeCardProps> = ({
       
       <p 
         className={cn(
-          'font-display text-5xl font-bold tabular-nums',
+          'font-display text-3xl font-bold tabular-nums',
           isNext && 'text-primary',
           isCurrent && 'text-secondary',
           !isNext && !isCurrent && 'text-foreground'
@@ -51,7 +51,7 @@ export const PrayerTimeCard: React.FC<PrayerTimeCardProps> = ({
       </p>
       
       {isNext && (
-        <span className="mt-4 text-xl text-primary/80 font-display">
+        <span className="mt-2 text-base text-primary/80 font-display">
           الصلاة القادمة
         </span>
       )}
