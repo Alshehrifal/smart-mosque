@@ -58,15 +58,17 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             <h2 className="font-arabic text-4xl text-foreground/80 mb-6">
               الصلاة القادمة: {nextPrayer.prayer.nameAr}
             </h2>
-            {/* Countdown Timer */}
-            <CountdownTimer
-              milliseconds={timeToNextEvent}
-              label="الوقت المتبقي"
-              size="large"
-              variant="primary"
-            />
+            {/* Countdown Timer - Only show when 30 minutes or less remaining */}
+            {timeToNextEvent <= 30 * 60 * 1000 && (
+              <CountdownTimer
+                milliseconds={timeToNextEvent}
+                label="الوقت المتبقي"
+                size="large"
+                variant="primary"
+              />
+            )}
             {/* Prayer Time */}
-            <p className="mt-6 font-display text-4xl text-foreground/90 tabular-nums">
+            <p className={`font-display text-4xl text-foreground/90 tabular-nums ${timeToNextEvent <= 30 * 60 * 1000 ? 'mt-6' : 'mt-0'}`}>
               {formatTime(nextPrayer.prayer.time)}
             </p>
             {/* Hijri Date */}
