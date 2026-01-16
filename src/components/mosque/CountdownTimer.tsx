@@ -19,11 +19,11 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   const isUrgent = milliseconds < 60000; // Less than 1 minute
 
   return (
-    <div className="flex flex-col items-center gap-1 sm:gap-2">
+    <div className="flex flex-col items-center gap-3">
       <span 
         className={cn(
           'font-display text-muted-foreground',
-          size === 'large' && 'text-base sm:text-lg md:text-xl lg:text-2xl'
+          size === 'large' && 'text-3xl'
         )}
       >
         {label}
@@ -32,8 +32,8 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
       <div
         className={cn(
           'font-display font-bold tabular-nums tracking-wider',
-          size === 'normal' && 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl',
-          size === 'large' && 'text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl',
+          size === 'normal' && 'text-6xl',
+          size === 'large' && 'text-8xl',
           variant === 'primary' && 'text-primary',
           variant === 'secondary' && 'text-secondary',
           variant === 'muted' && 'text-muted-foreground',
