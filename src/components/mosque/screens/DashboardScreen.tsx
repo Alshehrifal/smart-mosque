@@ -41,14 +41,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
     <div className="h-screen bg-islamic flex flex-col relative overflow-hidden">
       <IslamicPattern opacity={0.04} />
       
-      {/* Header - Mosque Name only */}
-      <header className="relative z-10 px-12 py-8 border-b border-border/30">
-        <div className="text-center">
-          <h1 className="font-arabic text-5xl text-gradient-gold">
-            {mosqueName}
-          </h1>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-12 py-8">
@@ -101,7 +93,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               hour: '2-digit',
               minute: '2-digit',
               second: '2-digit',
-              hour12: false,
+              hour12: true,
             })}
           </p>
           {/* Gregorian Date */}
