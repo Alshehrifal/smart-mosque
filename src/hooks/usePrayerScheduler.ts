@@ -3,6 +3,7 @@ import {
   calculatePrayerTimes,
   getPrayerTimesWithCache,
   getNextPrayer,
+  getCurrentActivePrayer,
   defaultSettings,
   type DailyPrayerTimes,
   type PrayerTime,
@@ -116,64 +117,67 @@ export function usePrayerScheduler(demoMode: boolean = false) {
       
       const now = new Date();
       const nextPrayer = getNextPrayer(state.prayerTimes, now);
+      const activePrayer = getCurrentActivePrayer(state.prayerTimes, now, state.settings);
       
       // Determine screen state based on time
       let screenState: ScreenState = 'dashboard';
       let currentPrayer = state.currentPrayer;
       let timeToNextEvent = 0;
       
-      if (nextPrayer) {
-        const timeToAdhan = nextPrayer.prayer.time.getTime() - now.getTime();
-        const iqamaTime = new Date(nextPrayer.prayer.time.getTime() + nextPrayer.prayer.iqamaOffset * 60000);
-        const timeToIqama = iqamaTime.getTime() - now.getTime();
+      // Check if we're in an active prayer cycle
+      if (activePrayer) {
+        const adhanTime = activePrayer.prayer.time.getTime();
+        const iqamaTime = adhanTime + activePrayer.prayer.iqamaOffset * 60000;
+        const timeToAdhan = adhanTime - now.getTime();
+        const timeToIqama = iqamaTime - now.getTime();
         
         // Pre-adhan (5 minutes before)
         if (timeToAdhan > 0 && timeToAdhan <= 5 * 60 * 1000) {
           screenState = 'pre-adhan';
           timeToNextEvent = timeToAdhan;
-          currentPrayer = nextPrayer;
+          currentPrayer = activePrayer;
         }
         // Adhan time (first 3 minutes after adhan time)
         else if (timeToAdhan <= 0 && timeToAdhan > -3 * 60 * 1000) {
           screenState = 'adhan';
           timeToNextEvent = timeToIqama;
-          currentPrayer = nextPrayer;
+          currentPrayer = activePrayer;
         }
         // Between adhan and iqama
         else if (timeToAdhan <= -3 * 60 * 1000 && timeToIqama > 0) {
           screenState = 'between-adhan-iqama';
           timeToNextEvent = timeToIqama;
-          currentPrayer = nextPrayer;
+          currentPrayer = activePrayer;
         }
         // Iqama time (1 minute)
         else if (timeToIqama <= 0 && timeToIqama > -1 * 60 * 1000) {
           screenState = 'iqama';
           timeToNextEvent = -timeToIqama + state.settings.prayerDuration * 60 * 1000;
-          currentPrayer = nextPrayer;
+          currentPrayer = activePrayer;
         }
         // During prayer
         else if (timeToIqama <= -1 * 60 * 1000 && 
                  timeToIqama > -(1 + state.settings.prayerDuration) * 60 * 1000) {
           screenState = 'prayer';
-          const prayerEndTime = iqamaTime.getTime() + (1 + state.settings.prayerDuration) * 60 * 1000;
+          const prayerEndTime = iqamaTime + (1 + state.settings.prayerDuration) * 60 * 1000;
           timeToNextEvent = prayerEndTime - now.getTime();
-          currentPrayer = nextPrayer;
+          currentPrayer = activePrayer;
         }
         // Adhkar after prayer
         else if (timeToIqama <= -(1 + state.settings.prayerDuration) * 60 * 1000 &&
                  timeToIqama > -(1 + state.settings.prayerDuration + state.settings.adhkarDuration) * 60 * 1000) {
           screenState = 'adhkar';
-          const adhkarEndTime = iqamaTime.getTime() + 
+          const adhkarEndTime = iqamaTime + 
             (1 + state.settings.prayerDuration + state.settings.adhkarDuration) * 60 * 1000;
           timeToNextEvent = adhkarEndTime - now.getTime();
-          currentPrayer = nextPrayer;
+          currentPrayer = activePrayer;
         }
-        // Dashboard
-        else {
-          screenState = 'dashboard';
-          timeToNextEvent = timeToAdhan > 0 ? timeToAdhan : 0;
-          currentPrayer = null;
-        }
+      }
+      // Not in an active prayer cycle - show dashboard
+      else if (nextPrayer) {
+        screenState = 'dashboard';
+        timeToNextEvent = nextPrayer.prayer.time.getTime() - now.getTime();
+        currentPrayer = null;
       }
       
       setState(prev => ({
