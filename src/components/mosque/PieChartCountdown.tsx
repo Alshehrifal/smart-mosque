@@ -22,21 +22,15 @@ export const PieChartCountdown: React.FC<PieChartCountdownProps> = ({
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - elapsed / 100);
   
-  // Format time remaining
+  // Format time remaining with English numerals
   const formatTime = (ms: number): { minutes: string; seconds: string } => {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     
-    // Convert to Arabic numerals
-    const toArabicNumerals = (num: number): string => {
-      const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-      return num.toString().padStart(2, '0').replace(/\d/g, (d) => arabicDigits[parseInt(d)]);
-    };
-    
     return {
-      minutes: toArabicNumerals(minutes),
-      seconds: toArabicNumerals(seconds),
+      minutes: minutes.toString().padStart(2, '0'),
+      seconds: seconds.toString().padStart(2, '0'),
     };
   };
   

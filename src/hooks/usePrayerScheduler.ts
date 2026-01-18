@@ -53,6 +53,7 @@ export function usePrayerScheduler(demoMode: boolean = false) {
       'dashboard',
       'pre-adhan',
       'adhan',
+      'post-adhan-dua',
       'between-adhan-iqama',
       'iqama',
       'prayer',
@@ -143,8 +144,14 @@ export function usePrayerScheduler(demoMode: boolean = false) {
           timeToNextEvent = timeToIqama;
           currentPrayer = activePrayer;
         }
+        // Post-adhan dua (30 seconds after adhan ends, i.e., 3-3.5 min after adhan)
+        else if (timeToAdhan <= -3 * 60 * 1000 && timeToAdhan > -3.5 * 60 * 1000) {
+          screenState = 'post-adhan-dua';
+          timeToNextEvent = timeToIqama;
+          currentPrayer = activePrayer;
+        }
         // Between adhan and iqama
-        else if (timeToAdhan <= -3 * 60 * 1000 && timeToIqama > 0) {
+        else if (timeToAdhan <= -3.5 * 60 * 1000 && timeToIqama > 0) {
           screenState = 'between-adhan-iqama';
           timeToNextEvent = timeToIqama;
           currentPrayer = activePrayer;
@@ -155,20 +162,20 @@ export function usePrayerScheduler(demoMode: boolean = false) {
           timeToNextEvent = -timeToIqama + state.settings.prayerDuration * 60 * 1000;
           currentPrayer = activePrayer;
         }
-        // During prayer
+        // During prayer (8 minutes from iqama)
         else if (timeToIqama <= -1 * 60 * 1000 && 
-                 timeToIqama > -(1 + state.settings.prayerDuration) * 60 * 1000) {
+                 timeToIqama > -(1 + 8) * 60 * 1000) {
           screenState = 'prayer';
-          const prayerEndTime = iqamaTime + (1 + state.settings.prayerDuration) * 60 * 1000;
+          const prayerEndTime = iqamaTime + (1 + 8) * 60 * 1000;
           timeToNextEvent = prayerEndTime - now.getTime();
           currentPrayer = activePrayer;
         }
-        // Adhkar after prayer
-        else if (timeToIqama <= -(1 + state.settings.prayerDuration) * 60 * 1000 &&
-                 timeToIqama > -(1 + state.settings.prayerDuration + state.settings.adhkarDuration) * 60 * 1000) {
+        // Adhkar after prayer (starts 8 minutes after iqama)
+        else if (timeToIqama <= -(1 + 8) * 60 * 1000 &&
+                 timeToIqama > -(1 + 8 + state.settings.adhkarDuration) * 60 * 1000) {
           screenState = 'adhkar';
           const adhkarEndTime = iqamaTime + 
-            (1 + state.settings.prayerDuration + state.settings.adhkarDuration) * 60 * 1000;
+            (1 + 8 + state.settings.adhkarDuration) * 60 * 1000;
           timeToNextEvent = adhkarEndTime - now.getTime();
           currentPrayer = activePrayer;
         }
