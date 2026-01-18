@@ -256,6 +256,36 @@ export function getNextPrayer(prayerTimes: DailyPrayerTimes, currentTime: Date):
   return null; // All prayers passed, next is tomorrow's Fajr
 }
 
+// Get the current active prayer (the one we're in the middle of its adhan/iqama/prayer cycle)
+export function getCurrentActivePrayer(
+  prayerTimes: DailyPrayerTimes, 
+  currentTime: Date, 
+  settings: { prayerDuration: number; adhkarDuration: number }
+): { prayer: PrayerTime; name: PrayerName } | null {
+  const prayers: { prayer: PrayerTime; name: PrayerName }[] = [
+    { prayer: prayerTimes.fajr, name: 'fajr' },
+    { prayer: prayerTimes.dhuhr, name: 'dhuhr' },
+    { prayer: prayerTimes.asr, name: 'asr' },
+    { prayer: prayerTimes.maghrib, name: 'maghrib' },
+    { prayer: prayerTimes.isha, name: 'isha' },
+  ];
+  
+  for (const p of prayers) {
+    const adhanTime = p.prayer.time.getTime();
+    const iqamaTime = adhanTime + p.prayer.iqamaOffset * 60000;
+    const prayerEndTime = iqamaTime + (1 + settings.prayerDuration + settings.adhkarDuration) * 60000;
+    
+    // Check if we're currently in this prayer's cycle (from 5 min before adhan to end of adhkar)
+    const preAdhanStart = adhanTime - 5 * 60000;
+    
+    if (currentTime.getTime() >= preAdhanStart && currentTime.getTime() <= prayerEndTime) {
+      return p;
+    }
+  }
+  
+  return null;
+}
+
 export function formatTime(date: Date): string {
   return date.toLocaleTimeString('ar-SA', {
     hour: '2-digit',
