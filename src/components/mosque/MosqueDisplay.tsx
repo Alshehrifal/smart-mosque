@@ -59,6 +59,7 @@ export const MosqueDisplay: React.FC<MosqueDisplayProps> = ({
           <BetweenAdhanIqamaScreen
             prayer={prayer}
             timeToIqama={timeToNextEvent}
+            totalIqamaTime={prayer.iqamaOffset * 60 * 1000}
             currentTime={currentTime}
           />
         ) : null;

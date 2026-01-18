@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { IslamicPattern } from '../IslamicPattern';
-import { CountdownTimer } from '../CountdownTimer';
+import { PieChartCountdown } from '../PieChartCountdown';
 import { getAdhkarForPrayer, type Dhikr } from '@/lib/adhkar';
 import { type PrayerTime } from '@/lib/prayerTimes';
 
 interface BetweenAdhanIqamaScreenProps {
   prayer: PrayerTime;
   timeToIqama: number;
+  totalIqamaTime: number; // Total time from adhan to iqama in ms
   currentTime: Date;
 }
 
 export const BetweenAdhanIqamaScreen: React.FC<BetweenAdhanIqamaScreenProps> = ({
   prayer,
   timeToIqama,
+  totalIqamaTime,
   currentTime,
 }) => {
   const [currentDhikr, setCurrentDhikr] = useState<Dhikr | null>(null);
@@ -37,16 +39,16 @@ export const BetweenAdhanIqamaScreen: React.FC<BetweenAdhanIqamaScreenProps> = (
     <div className="h-screen bg-islamic flex flex-col relative overflow-hidden">
       <IslamicPattern opacity={0.04} />
       
-      {/* Header with countdown */}
-      <header className="relative z-10 px-12 py-10 text-center">
-        <h2 className="font-arabic text-4xl text-foreground/80 mb-6">
+      {/* Header with pie chart countdown */}
+      <header className="relative z-10 px-12 py-8 flex flex-col items-center justify-center">
+        <h2 className="font-arabic text-4xl text-foreground/80 mb-8">
           باقي على إقامة صلاة {prayer.nameAr}
         </h2>
-        <CountdownTimer
-          milliseconds={timeToIqama}
-          label=""
-          size="large"
-          variant="secondary"
+        <PieChartCountdown
+          remainingMs={timeToIqama}
+          totalMs={totalIqamaTime}
+          size={280}
+          strokeWidth={20}
         />
       </header>
 
