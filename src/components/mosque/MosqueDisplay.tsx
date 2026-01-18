@@ -3,6 +3,7 @@ import { usePrayerScheduler } from '@/hooks/usePrayerScheduler';
 import { DashboardScreen } from './screens/DashboardScreen';
 import { PreAdhanScreen } from './screens/PreAdhanScreen';
 import { AdhanScreen } from './screens/AdhanScreen';
+import { PostAdhanDuaScreen } from './screens/PostAdhanDuaScreen';
 import { BetweenAdhanIqamaScreen } from './screens/BetweenAdhanIqamaScreen';
 import { IqamaScreen } from './screens/IqamaScreen';
 import { PrayerScreen } from './screens/PrayerScreen';
@@ -49,6 +50,14 @@ export const MosqueDisplay: React.FC<MosqueDisplayProps> = ({
       case 'adhan':
         return prayer ? (
           <AdhanScreen
+            prayer={prayer}
+            currentTime={currentTime}
+          />
+        ) : null;
+        
+      case 'post-adhan-dua':
+        return prayer ? (
+          <PostAdhanDuaScreen
             prayer={prayer}
             currentTime={currentTime}
           />
@@ -141,6 +150,7 @@ export const MosqueDisplay: React.FC<MosqueDisplayProps> = ({
             {screenState === 'dashboard' && 'الرئيسية'}
             {screenState === 'pre-adhan' && 'قبل الأذان'}
             {screenState === 'adhan' && 'الأذان'}
+            {screenState === 'post-adhan-dua' && 'دعاء بعد الأذان'}
             {screenState === 'between-adhan-iqama' && 'بين الأذان والإقامة'}
             {screenState === 'iqama' && 'الإقامة'}
             {screenState === 'prayer' && 'الصلاة'}
