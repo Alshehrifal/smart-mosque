@@ -60,11 +60,11 @@ export const AdhanScreen: React.FC<AdhanScreenProps> = ({
       {/* Current time */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
         <p className="font-display text-5xl text-foreground/60 tabular-nums">
-          {currentTime.toLocaleTimeString('ar-SA', {
+          {currentTime.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-            hour12: false,
+            hour12: true,
           })}
         </p>
       </div>

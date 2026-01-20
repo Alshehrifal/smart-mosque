@@ -65,11 +65,11 @@ export const PreAdhanScreen: React.FC<PreAdhanScreenProps> = ({
       {/* Current time */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
         <p className="font-display text-4xl text-foreground/60 tabular-nums">
-          {currentTime.toLocaleTimeString('ar-SA', {
+          {currentTime.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-            hour12: false,
+            hour12: true,
           })}
         </p>
       </div>

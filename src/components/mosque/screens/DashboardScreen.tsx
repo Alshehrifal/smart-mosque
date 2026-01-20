@@ -89,7 +89,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
       <footer className="relative z-10 px-12 py-6 border-t border-border/30">
         <div className="flex flex-col items-center gap-3">
           <p className="font-display text-7xl font-bold text-foreground tabular-nums">
-            {currentTime.toLocaleTimeString('ar-SA', {
+            {currentTime.toLocaleTimeString('en-US', {
               hour: '2-digit',
               minute: '2-digit',
               second: '2-digit',
