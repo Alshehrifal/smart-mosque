@@ -111,11 +111,11 @@ export const BetweenAdhanIqamaScreen: React.FC<BetweenAdhanIqamaScreenProps> = (
             الدعاء بين الأذان والإقامة لا يُرد
           </p>
           <p className="font-display text-4xl text-foreground/60 tabular-nums">
-            {currentTime.toLocaleTimeString('ar-SA', {
+            {currentTime.toLocaleTimeString('en-US', {
               hour: '2-digit',
               minute: '2-digit',
               second: '2-digit',
-              hour12: false,
+              hour12: true,
             })}
           </p>
         </div>
