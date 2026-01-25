@@ -49,12 +49,12 @@ export const defaultSettings: MosqueSettings = {
   calculationMethod: '4', // Umm Al-Qura
   school: '0', // Shafi
   iqamaOffsets: {
-    fajr: 25,
+    fajr: 27,
     sunrise: 0,
-    dhuhr: 20,
-    asr: 20,
-    maghrib: 10,
-    isha: 20,
+    dhuhr: 22,
+    asr: 22,
+    maghrib: 12,
+    isha: 22,
   },
   prayerDuration: 15,
   adhkarDuration: 5,
