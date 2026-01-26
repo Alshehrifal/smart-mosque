@@ -49,14 +49,14 @@ export const defaultSettings: MosqueSettings = {
   calculationMethod: '4', // Umm Al-Qura
   school: '0', // Shafi
   iqamaOffsets: {
-    fajr: 27,
+    fajr: 28,
     sunrise: 0,
-    dhuhr: 22,
-    asr: 22,
-    maghrib: 12,
-    isha: 22,
+    dhuhr: 23,
+    asr: 23,
+    maghrib: 13,
+    isha: 23,
   },
-  prayerDuration: 15,
+  prayerDuration: 8.5, // 8 minutes 30 seconds
   adhkarDuration: 5,
 };
 
@@ -69,11 +69,11 @@ interface PrayerTimesCache {
 
 let prayerTimesCache: PrayerTimesCache | null = null;
 
-// Parse time string (HH:MM) to Date object
-function parseTimeString(timeStr: string, date: Date): Date {
+// Parse time string (HH:MM) to Date object with optional offset
+function parseTimeString(timeStr: string, date: Date, offsetMinutes: number = 0): Date {
   const [hours, minutes] = timeStr.split(':').map(Number);
   const result = new Date(date);
-  result.setHours(hours, minutes, 0, 0);
+  result.setHours(hours, minutes + offsetMinutes, 0, 0);
   return result;
 }
 
@@ -103,41 +103,44 @@ export async function fetchPrayerTimesFromAPI(settings: MosqueSettings): Promise
     const timings = data.data.timings;
     const today = new Date();
     
+    // Add 1 minute offset to adhan times per Umm al-Qura calendar adjustment
+    const adhanOffset = 1;
+    
     const prayerTimes: DailyPrayerTimes = {
       fajr: {
         name: 'Fajr',
         nameAr: 'الفجر',
-        time: parseTimeString(timings.Fajr, today),
+        time: parseTimeString(timings.Fajr, today, adhanOffset),
         iqamaOffset: settings.iqamaOffsets.fajr,
       },
       sunrise: {
         name: 'Sunrise',
         nameAr: 'الشروق',
-        time: parseTimeString(timings.Sunrise, today),
+        time: parseTimeString(timings.Sunrise, today, adhanOffset),
         iqamaOffset: 0,
       },
       dhuhr: {
         name: 'Dhuhr',
         nameAr: 'الظهر',
-        time: parseTimeString(timings.Dhuhr, today),
+        time: parseTimeString(timings.Dhuhr, today, adhanOffset),
         iqamaOffset: settings.iqamaOffsets.dhuhr,
       },
       asr: {
         name: 'Asr',
         nameAr: 'العصر',
-        time: parseTimeString(timings.Asr, today),
+        time: parseTimeString(timings.Asr, today, adhanOffset),
         iqamaOffset: settings.iqamaOffsets.asr,
       },
       maghrib: {
         name: 'Maghrib',
         nameAr: 'المغرب',
-        time: parseTimeString(timings.Maghrib, today),
+        time: parseTimeString(timings.Maghrib, today, adhanOffset),
         iqamaOffset: settings.iqamaOffsets.maghrib,
       },
       isha: {
         name: 'Isha',
         nameAr: 'العشاء',
-        time: parseTimeString(timings.Isha, today),
+        time: parseTimeString(timings.Isha, today, adhanOffset),
         iqamaOffset: settings.iqamaOffsets.isha,
       },
     };
