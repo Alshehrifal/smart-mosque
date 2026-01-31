@@ -67,7 +67,46 @@ interface PrayerTimesCache {
   hijriDate: string;
 }
 
-let prayerTimesCache: PrayerTimesCache | null = null;
+const STORAGE_KEY = 'mosque_prayer_times_cache';
+
+// Load cache from localStorage
+function loadCacheFromStorage(): PrayerTimesCache | null {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return null;
+    
+    const parsed = JSON.parse(stored);
+    // Convert date strings back to Date objects
+    const data: DailyPrayerTimes = {
+      fajr: { ...parsed.data.fajr, time: new Date(parsed.data.fajr.time) },
+      sunrise: { ...parsed.data.sunrise, time: new Date(parsed.data.sunrise.time) },
+      dhuhr: { ...parsed.data.dhuhr, time: new Date(parsed.data.dhuhr.time) },
+      asr: { ...parsed.data.asr, time: new Date(parsed.data.asr.time) },
+      maghrib: { ...parsed.data.maghrib, time: new Date(parsed.data.maghrib.time) },
+      isha: { ...parsed.data.isha, time: new Date(parsed.data.isha.time) },
+    };
+    
+    return {
+      date: parsed.date,
+      data,
+      hijriDate: parsed.hijriDate,
+    };
+  } catch (error) {
+    console.warn('Failed to load prayer times from storage:', error);
+    return null;
+  }
+}
+
+// Save cache to localStorage
+function saveCacheToStorage(cache: PrayerTimesCache): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
+  } catch (error) {
+    console.warn('Failed to save prayer times to storage:', error);
+  }
+}
+
+let prayerTimesCache: PrayerTimesCache | null = loadCacheFromStorage();
 
 // Parse time string (HH:MM) to Date object with optional offset
 function parseTimeString(timeStr: string, date: Date, offsetMinutes: number = 0): Date {
@@ -176,6 +215,8 @@ export async function getPrayerTimesWithCache(settings: MosqueSettings): Promise
       data: result.prayerTimes,
       hijriDate: result.hijriDate,
     };
+    // Save to localStorage for offline use
+    saveCacheToStorage(prayerTimesCache);
     return result;
   }
   
