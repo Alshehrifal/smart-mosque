@@ -60,36 +60,60 @@ export const defaultSettings: MosqueSettings = {
   adhkarDuration: 5,
 };
 
-// Cache for prayer times
-interface PrayerTimesCache {
-  date: string;
-  data: DailyPrayerTimes;
+// Cache for prayer times - now stores multiple days
+interface DayPrayerData {
+  prayerTimes: DailyPrayerTimes;
   hijriDate: string;
 }
 
-const STORAGE_KEY = 'mosque_prayer_times_cache';
+interface WeeklyPrayerTimesCache {
+  fetchedAt: string; // ISO date when data was fetched
+  days: Record<string, DayPrayerData>; // key: DD-MM-YYYY
+}
+
+const STORAGE_KEY = 'mosque_prayer_times_weekly_cache';
+
+// Format date to DD-MM-YYYY (matching API format)
+function formatDateKey(date: Date): string {
+  return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+}
+
+// Parse time string (HH:MM) to Date object for a specific date
+function parseTimeStringForDate(timeStr: string, dateKey: string, offsetMinutes: number = 0): Date {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  const [day, month, year] = dateKey.split('-').map(Number);
+  const result = new Date(year, month - 1, day, hours, minutes + offsetMinutes, 0, 0);
+  return result;
+}
 
 // Load cache from localStorage
-function loadCacheFromStorage(): PrayerTimesCache | null {
+function loadCacheFromStorage(): WeeklyPrayerTimesCache | null {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return null;
     
     const parsed = JSON.parse(stored);
-    // Convert date strings back to Date objects
-    const data: DailyPrayerTimes = {
-      fajr: { ...parsed.data.fajr, time: new Date(parsed.data.fajr.time) },
-      sunrise: { ...parsed.data.sunrise, time: new Date(parsed.data.sunrise.time) },
-      dhuhr: { ...parsed.data.dhuhr, time: new Date(parsed.data.dhuhr.time) },
-      asr: { ...parsed.data.asr, time: new Date(parsed.data.asr.time) },
-      maghrib: { ...parsed.data.maghrib, time: new Date(parsed.data.maghrib.time) },
-      isha: { ...parsed.data.isha, time: new Date(parsed.data.isha.time) },
-    };
+    
+    // Convert date strings back to Date objects for each day
+    const days: Record<string, DayPrayerData> = {};
+    for (const [dateKey, dayData] of Object.entries(parsed.days)) {
+      const data = dayData as any;
+      days[dateKey] = {
+        prayerTimes: {
+          fajr: { ...data.prayerTimes.fajr, time: new Date(data.prayerTimes.fajr.time) },
+          sunrise: { ...data.prayerTimes.sunrise, time: new Date(data.prayerTimes.sunrise.time) },
+          dhuhr: { ...data.prayerTimes.dhuhr, time: new Date(data.prayerTimes.dhuhr.time) },
+          asr: { ...data.prayerTimes.asr, time: new Date(data.prayerTimes.asr.time) },
+          maghrib: { ...data.prayerTimes.maghrib, time: new Date(data.prayerTimes.maghrib.time) },
+          isha: { ...data.prayerTimes.isha, time: new Date(data.prayerTimes.isha.time) },
+        },
+        hijriDate: data.hijriDate,
+      };
+    }
     
     return {
-      date: parsed.date,
-      data,
-      hijriDate: parsed.hijriDate,
+      fetchedAt: parsed.fetchedAt,
+      days,
     };
   } catch (error) {
     console.warn('Failed to load prayer times from storage:', error);
@@ -98,17 +122,23 @@ function loadCacheFromStorage(): PrayerTimesCache | null {
 }
 
 // Save cache to localStorage
-function saveCacheToStorage(cache: PrayerTimesCache): void {
+function saveCacheToStorage(cache: WeeklyPrayerTimesCache): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
+    console.log('Saved prayer times for', Object.keys(cache.days).length, 'days to storage');
   } catch (error) {
     console.warn('Failed to save prayer times to storage:', error);
   }
 }
 
-let prayerTimesCache: PrayerTimesCache | null = loadCacheFromStorage();
+let weeklyCache: WeeklyPrayerTimesCache | null = loadCacheFromStorage();
 
-// Parse time string (HH:MM) to Date object with optional offset
+// Get today's date key
+function getTodayKey(): string {
+  return formatDateKey(new Date());
+}
+
+// Parse time string (HH:MM) to Date object with optional offset (legacy support)
 function parseTimeString(timeStr: string, date: Date, offsetMinutes: number = 0): Date {
   const [hours, minutes] = timeStr.split(':').map(Number);
   const result = new Date(date);
@@ -116,14 +146,56 @@ function parseTimeString(timeStr: string, date: Date, offsetMinutes: number = 0)
   return result;
 }
 
-// Get today's date string for cache key
-function getTodayKey(): string {
-  const today = new Date();
-  return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+// Convert API timings to DailyPrayerTimes for a specific date
+function convertTimingsToPrayerTimes(
+  timings: { Fajr: string; Sunrise: string; Dhuhr: string; Asr: string; Maghrib: string; Isha: string },
+  dateKey: string,
+  settings: MosqueSettings
+): DailyPrayerTimes {
+  const adhanOffset = 1; // +1 minute per Umm al-Qura calendar adjustment
+  
+  return {
+    fajr: {
+      name: 'Fajr',
+      nameAr: 'الفجر',
+      time: parseTimeStringForDate(timings.Fajr, dateKey, adhanOffset),
+      iqamaOffset: settings.iqamaOffsets.fajr,
+    },
+    sunrise: {
+      name: 'Sunrise',
+      nameAr: 'الشروق',
+      time: parseTimeStringForDate(timings.Sunrise, dateKey, adhanOffset),
+      iqamaOffset: 0,
+    },
+    dhuhr: {
+      name: 'Dhuhr',
+      nameAr: 'الظهر',
+      time: parseTimeStringForDate(timings.Dhuhr, dateKey, adhanOffset),
+      iqamaOffset: settings.iqamaOffsets.dhuhr,
+    },
+    asr: {
+      name: 'Asr',
+      nameAr: 'العصر',
+      time: parseTimeStringForDate(timings.Asr, dateKey, adhanOffset),
+      iqamaOffset: settings.iqamaOffsets.asr,
+    },
+    maghrib: {
+      name: 'Maghrib',
+      nameAr: 'المغرب',
+      time: parseTimeStringForDate(timings.Maghrib, dateKey, adhanOffset),
+      iqamaOffset: settings.iqamaOffsets.maghrib,
+    },
+    isha: {
+      name: 'Isha',
+      nameAr: 'العشاء',
+      time: parseTimeStringForDate(timings.Isha, dateKey, adhanOffset),
+      iqamaOffset: settings.iqamaOffsets.isha,
+    },
+  };
 }
 
-// Fetch prayer times from AlAdhan API via edge function
-export async function fetchPrayerTimesFromAPI(settings: MosqueSettings): Promise<{ prayerTimes: DailyPrayerTimes; hijriDate: string } | null> {
+// Fetch prayer times for a week from API via edge function
+export async function fetchWeeklyPrayerTimesFromAPI(settings: MosqueSettings): Promise<WeeklyPrayerTimesCache | null> {
   try {
     const { data, error } = await supabase.functions.invoke('get-prayer-times', {
       body: null,
@@ -139,85 +211,55 @@ export async function fetchPrayerTimesFromAPI(settings: MosqueSettings): Promise
       return null;
     }
 
-    const timings = data.data.timings;
-    const today = new Date();
+    const days: Record<string, DayPrayerData> = {};
     
-    // Add 1 minute offset to adhan times per Umm al-Qura calendar adjustment
-    const adhanOffset = 1;
+    // Process each day from the response
+    for (const dateKey of data.dates) {
+      const dayData = data.data[dateKey];
+      if (dayData) {
+        const hijri = dayData.date.hijri;
+        days[dateKey] = {
+          prayerTimes: convertTimingsToPrayerTimes(dayData.timings, dateKey, settings),
+          hijriDate: `${hijri.day} ${hijri.month.ar} ${hijri.year}`,
+        };
+      }
+    }
+
+    console.log('Fetched prayer times for', Object.keys(days).length, 'days');
     
-    const prayerTimes: DailyPrayerTimes = {
-      fajr: {
-        name: 'Fajr',
-        nameAr: 'الفجر',
-        time: parseTimeString(timings.Fajr, today, adhanOffset),
-        iqamaOffset: settings.iqamaOffsets.fajr,
-      },
-      sunrise: {
-        name: 'Sunrise',
-        nameAr: 'الشروق',
-        time: parseTimeString(timings.Sunrise, today, adhanOffset),
-        iqamaOffset: 0,
-      },
-      dhuhr: {
-        name: 'Dhuhr',
-        nameAr: 'الظهر',
-        time: parseTimeString(timings.Dhuhr, today, adhanOffset),
-        iqamaOffset: settings.iqamaOffsets.dhuhr,
-      },
-      asr: {
-        name: 'Asr',
-        nameAr: 'العصر',
-        time: parseTimeString(timings.Asr, today, adhanOffset),
-        iqamaOffset: settings.iqamaOffsets.asr,
-      },
-      maghrib: {
-        name: 'Maghrib',
-        nameAr: 'المغرب',
-        time: parseTimeString(timings.Maghrib, today, adhanOffset),
-        iqamaOffset: settings.iqamaOffsets.maghrib,
-      },
-      isha: {
-        name: 'Isha',
-        nameAr: 'العشاء',
-        time: parseTimeString(timings.Isha, today, adhanOffset),
-        iqamaOffset: settings.iqamaOffsets.isha,
-      },
+    return {
+      fetchedAt: new Date().toISOString(),
+      days,
     };
-
-    // Get Hijri date from response
-    const hijri = data.data.date.hijri;
-    const hijriDate = `${hijri.day} ${hijri.month.ar} ${hijri.year}`;
-
-    return { prayerTimes, hijriDate };
   } catch (error) {
-    console.error('Error fetching prayer times:', error);
+    console.error('Error fetching weekly prayer times:', error);
     return null;
   }
 }
 
-// Calculate prayer times with caching
+// Calculate prayer times with weekly caching
 export async function getPrayerTimesWithCache(settings: MosqueSettings): Promise<{ prayerTimes: DailyPrayerTimes; hijriDate: string }> {
   const todayKey = getTodayKey();
   
-  // Check cache
-  if (prayerTimesCache && prayerTimesCache.date === todayKey) {
-    console.log('Using cached prayer times');
-    return { prayerTimes: prayerTimesCache.data, hijriDate: prayerTimesCache.hijriDate };
+  // Check if we have today's data in cache
+  if (weeklyCache && weeklyCache.days[todayKey]) {
+    console.log('Using cached prayer times for', todayKey);
+    const cached = weeklyCache.days[todayKey];
+    return { prayerTimes: cached.prayerTimes, hijriDate: cached.hijriDate };
   }
   
-  // Fetch from API
-  const result = await fetchPrayerTimesFromAPI(settings);
+  // Try to fetch a new week of prayer times
+  const result = await fetchWeeklyPrayerTimesFromAPI(settings);
   
   if (result) {
-    // Update cache
-    prayerTimesCache = {
-      date: todayKey,
-      data: result.prayerTimes,
-      hijriDate: result.hijriDate,
-    };
-    // Save to localStorage for offline use
-    saveCacheToStorage(prayerTimesCache);
-    return result;
+    weeklyCache = result;
+    saveCacheToStorage(weeklyCache);
+    
+    // Return today's data
+    if (result.days[todayKey]) {
+      const todayData = result.days[todayKey];
+      return { prayerTimes: todayData.prayerTimes, hijriDate: todayData.hijriDate };
+    }
   }
   
   // Fallback to local calculation if API fails

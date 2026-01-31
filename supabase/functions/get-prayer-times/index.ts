@@ -42,8 +42,53 @@ interface AlAdhanResponse {
   };
 }
 
-// Simple in-memory cache
-let cachedData: { date: string; data: AlAdhanResponse['data'] } | null = null;
+interface DayData {
+  timings: AlAdhanTimings;
+  date: AlAdhanResponse['data']['date'];
+}
+
+// Format date to DD-MM-YYYY in a specific timezone
+function formatDateInTimezone(date: Date, timezone: string): string {
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  };
+  const parts = new Intl.DateTimeFormat('en-GB', options).formatToParts(date);
+  const day = parts.find(p => p.type === 'day')?.value || '01';
+  const month = parts.find(p => p.type === 'month')?.value || '01';
+  const year = parts.find(p => p.type === 'year')?.value || '2026';
+  return `${day}-${month}-${year}`;
+}
+
+// Fetch prayer times for a single day
+async function fetchDayPrayerTimes(
+  date: string,
+  city: string,
+  country: string,
+  method: string,
+  school: string
+): Promise<DayData> {
+  const apiUrl = `https://api.aladhan.com/v1/timingsByCity/${date}?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=${method}&school=${school}`;
+  
+  const response = await fetch(apiUrl);
+  
+  if (!response.ok) {
+    throw new Error(`AlAdhan API error: ${response.status} ${response.statusText}`);
+  }
+  
+  const result: AlAdhanResponse = await response.json();
+  
+  if (result.code !== 200) {
+    throw new Error(`AlAdhan API returned error: ${result.status}`);
+  }
+  
+  return {
+    timings: result.data.timings,
+    date: result.data.date,
+  };
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -57,62 +102,37 @@ serve(async (req) => {
     const country = url.searchParams.get('country') || 'Saudi Arabia';
     const method = url.searchParams.get('method') || '4'; // Umm Al-Qura
     const school = url.searchParams.get('school') || '0'; // Shafi
-    const dateParam = url.searchParams.get('date'); // Optional: DD-MM-YYYY format
+    const days = parseInt(url.searchParams.get('days') || '7', 10); // Default 7 days
     
-    // Get today's date in DD-MM-YYYY format
-    const today = new Date();
-    const todayStr = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
-    const requestDate = dateParam || todayStr;
-    
-    // Check cache (only for today's date with default city)
-    const cacheKey = `${city}-${country}-${method}-${requestDate}`;
-    if (cachedData && cachedData.date === cacheKey) {
-      console.log('Returning cached prayer times for:', cacheKey);
-      return new Response(JSON.stringify({
-        success: true,
-        cached: true,
-        data: cachedData.data,
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // Get dates for the next N days (starting from today in Jeddah timezone)
+    const timezone = 'Asia/Riyadh'; // Saudi Arabia timezone
+    const dates: string[] = [];
+    for (let i = 0; i < days; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() + i);
+      dates.push(formatDateInTimezone(date, timezone));
     }
     
-    // Fetch from AlAdhan API
-    const apiUrl = `https://api.aladhan.com/v1/timingsByCity/${requestDate}?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=${method}&school=${school}`;
+    console.log(`Fetching prayer times for ${days} days:`, dates);
     
-    console.log('Fetching prayer times from AlAdhan API:', apiUrl);
+    // Fetch all days in parallel
+    const results = await Promise.all(
+      dates.map(date => fetchDayPrayerTimes(date, city, country, method, school))
+    );
     
-    const response = await fetch(apiUrl);
-    
-    if (!response.ok) {
-      throw new Error(`AlAdhan API error: ${response.status} ${response.statusText}`);
-    }
-    
-    const result: AlAdhanResponse = await response.json();
-    
-    if (result.code !== 200) {
-      throw new Error(`AlAdhan API returned error: ${result.status}`);
-    }
-    
-    // Cache the result
-    cachedData = {
-      date: cacheKey,
-      data: result.data,
-    };
-    
-    console.log('Prayer times fetched successfully:', {
-      city,
-      country,
-      method,
-      date: requestDate,
-      timezone: result.data.meta.timezone,
-      timings: result.data.timings,
+    // Create a map of date -> data
+    const prayerTimesMap: Record<string, DayData> = {};
+    results.forEach((data, index) => {
+      prayerTimesMap[dates[index]] = data;
     });
+    
+    console.log('Prayer times fetched successfully for dates:', Object.keys(prayerTimesMap));
     
     return new Response(JSON.stringify({
       success: true,
-      cached: false,
-      data: result.data,
+      data: prayerTimesMap,
+      dates: dates,
+      firstDay: results[0], // For backward compatibility
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
